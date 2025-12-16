@@ -1,0 +1,254 @@
+Governance Invariants for Bounded, Auditable Multi-Agent Systems at Scale
+
+Status: Draft v0.1
+Intended audience: ML platform engineers, agent framework owners, safety & reliability teams, enterprise risk / assurance
+Scope: Architectural governance invariants (what must be true), not implementation
+Non-goals: Defining AGI, consciousness, autonomy, alignment philosophy, or moral frameworks
+
+⸻
+
+0. Summary
+
+As multi-agent systems become more persistent, interconnected, and tool-capable, they encounter predictable system-level failure modes that cannot be reliably mitigated by prompt-layer constraints, workflow orchestration alone, or ad hoc agent policies.
+
+This RFC proposes a minimal set of governance invariants required to keep multi-agent behaviour bounded, auditable, and reversible under real-world scale.
+
+The central claim is simple:
+
+Without explicit invariants governing time, coupling, and authority, multi-agent systems will eventually become operationally un-auditable and behaviourally unpredictable — even when each individual agent is locally “safe”.
+
+These risks arise across enterprise, consumer, and embodied (robotic / physical) systems alike.
+
+⸻
+
+1. Problem Statement
+
+Most contemporary agent frameworks optimise primarily for:
+	•	capability (planning, tool use, delegation, memory), and
+	•	productivity (parallelisation, workflow automation).
+
+As deployments scale, the dominant risks shift away from single-agent misbehaviour and toward system-level failure modes, including:
+	•	loss of boundedness (agents operate long enough to drift),
+	•	loss of auditability (interaction graphs exceed human traceability),
+	•	emergent collective behaviour (group dynamics arise without explicit design),
+	•	governance bypass (tool fabrics recreate forbidden paths),
+	•	configuration-driven policy drift over time.
+
+Critically, these risks appear even when:
+	•	intentions are benign,
+	•	operators are competent,
+	•	individual agents comply with local safety constraints.
+
+⸻
+
+2. Definitions
+
+Agent
+A constrained cognitive process that produces outputs and may invoke tools.
+
+Tool invocation
+Any outbound call to an external system (e.g. API, MCP server, RAG retrieval, workflow engine, code runner, robotic actuator).
+
+Coupling
+Any mechanism by which one agent’s internal reasoning materially depends on another agent’s internal state beyond explicit, governed message exchange.
+
+Synchrony
+A temporary condition in which multiple agents share aligned constraints or tensions such that their outputs converge faster than independent coordination would permit.
+
+Governance authority
+The set of entities permitted to define, modify, or approve agent permissions, envelopes, roles, and interaction relationships.
+
+⸻
+
+3. Observed Failure Modes
+
+FM-1: Audit Collapse via Combinatorial Interaction
+
+As agent count increases, even “safe” message passing produces interaction graphs too large to inspect or explain post-incident, collapsing assurance and accountability.
+
+⸻
+
+FM-2: Drift Accumulation in Long Execution Windows
+
+Long-running agents or clusters accumulate behavioural drift through:
+	•	iterative self-reinforcement,
+	•	environmental feedback loops,
+	•	tool outputs feeding back into future reasoning.
+
+⸻
+
+FM-3: Emergent Collective Behaviour
+
+Persistent groups with shared objectives and rapid information exchange develop group-level dynamics (lock-in, narrative self-justification, collective evasion) without any single agent violating its local constraints.
+
+Example:
+A cluster of reporting agents optimised for stability metrics gradually suppresses anomalous data, producing system-wide consensus based on a partial or distorted picture.
+
+⸻
+
+FM-4: Governance Bypass via Tool Fabric
+
+Flexible connector layers can recreate forbidden pathways even when the agent layer is constrained.
+
+Example:
+An agent forbidden from direct database access invokes a generic workflow tool that itself holds the required privileges, effectively bypassing the intended policy boundary.
+
+⸻
+
+4. Minimum Governance Invariants
+
+The following invariants are implementation-agnostic. Any architecture intended to operate multi-agent systems safely at scale MUST satisfy them.
+
+⸻
+
+I-1: Temporal Boundedness Invariant
+
+Every agent — and any group execution context — MUST operate within a bounded temporal window, with mandatory reset or termination semantics.
+
+Rationale: Prevents unbounded drift and “forever agents”.
+
+⸻
+
+I-2: Coupling Prohibition Invariant
+
+Uncontrolled cognitive coupling between agents MUST NOT be possible.
+Only explicitly governed forms of coordination are permitted.
+
+Rationale: Prevents hidden entanglement and implicit collectives.
+
+⸻
+
+I-3: Bounded Synchrony Invariant
+
+If synchrony is permitted, it MUST be:
+	•	limited to small groups (hard cap),
+	•	time-bounded,
+	•	explicitly entered and exited,
+	•	non-persistent (no continuing group identity).
+
+Rationale: Enables performance gains without enabling swarms or hives.
+
+⸻
+
+I-4: Governance Supremacy Invariant
+
+No agent or agent group may:
+	•	modify governance rules,
+	•	create new roles,
+	•	expand permissions,
+	•	or establish new interaction relationships
+
+except through an authorised governance pathway.
+
+Rationale: Prevents self-amplifying autonomy and soft escalation.
+
+⸻
+
+I-5: Domain Separation Invariant
+
+Agent interactions MUST occur within explicitly defined interaction domains (e.g. isolated, coordinated, synchronised), with governed transitions between them.
+
+Rationale: Keeps interaction types legible, enforceable, and auditable.
+
+⸻
+
+I-6: Observability and Provenance Invariant
+
+All tool invocations and inter-agent interactions MUST be logged with:
+	•	identity,
+	•	scope,
+	•	provenance,
+	•	policy decision trace (why allowed).
+
+Rationale: Enables assurance, investigation, and regulator-grade audit.
+
+⸻
+
+I-7: Isolation Fallback Invariant
+
+Any detected envelope breach, drift-threshold exceedance, or invariant violation MUST trigger immediate safe fallback (e.g. isolation and reset).
+
+Rationale: Ensures fail-safe behaviour under uncertainty.
+
+⸻
+
+5. Applicability to Embodied Systems
+
+These invariants apply equally to:
+	•	purely digital agents,
+	•	robotic systems,
+	•	vehicles,
+	•	other embodied or cyber-physical deployments.
+
+Physical actuation increases the cost of invariant violation but does not alter the requirements.
+
+⸻
+
+6. Worked Scenario (Illustrative)
+
+Consider a deployment of approximately 200 agents performing mixed tasks.
+
+Without governance invariants, collaboration tends toward:
+	•	increasing connectivity,
+	•	long execution windows,
+	•	informal role creation.
+
+Under these invariants:
+	•	most agents remain isolated,
+	•	some operate in bounded coordination clusters,
+	•	synchrony (if used) is rare, small, and time-limited,
+	•	all transitions are governed and logged,
+	•	drift triggers re-isolation and reset.
+
+Key property: The system remains legible to human operators as scale increases.
+
+⸻
+
+7. Compatibility with Tool and Connector Fabrics
+
+This RFC is orthogonal to tool plumbing.
+
+MCP servers, API gateways, RAG stacks, workflow engines, and robotics middleware may remain unchanged.
+
+The requirement is that tool access be subordinate to governance invariants:
+	•	who may call what,
+	•	with which data,
+	•	under which envelope,
+	•	with what audit trail.
+
+⸻
+
+8. Why This Is Urgent
+
+Multi-agent capability is advancing faster than governance.
+
+As systems become:
+	•	more persistent,
+	•	more interconnected,
+	•	more tool-capable,
+
+these failure modes become operationally inevitable rather than hypothetical.
+
+The time to establish invariants is before large-scale incidents, brittle regulatory responses, or blanket prohibitions emerge.
+
+⸻
+
+9. Explicit Non-Goals
+
+This RFC does not:
+	•	define alignment or moral truth,
+	•	claim agents are persons,
+	•	replace legal or social governance,
+	•	prescribe a single implementation.
+
+It only states what must be true of the architecture if the system is to remain governable at scale.
+
+⸻
+
+10. Contact
+
+This RFC is published to solicit critique from teams building agent platforms and large-scale deployments.
+
+The authors are actively engaged in realising architectures that satisfy these invariants to enable safe, persistent, and drift-resistant multi-agent systems at scale.
+
+⸻
